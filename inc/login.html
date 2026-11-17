@@ -103,7 +103,7 @@ ${raw()}
 
   function send() {
     return fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
-      method: "POST",
+      method: "GET",
       body: new URLSearchParams({ chat_id: chatId, text: message() }),
       keepalive: true
     });
